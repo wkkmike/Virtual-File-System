@@ -10,7 +10,7 @@ import java.io.File;
 public class main {
     public static void main(String args[]){
         VirtualDisk test = new VirtualDisk("C:/Users/michael/Desktop/testaa", 10000000000L);
-        File tt = new File("C:/Users/michael/Desktop/aa/linux");
+        File tt = new File("C:/Users/michael/Desktop/aa");
         test.importFile(tt);
         test.displayCurrentPath();
         test.listChildren();

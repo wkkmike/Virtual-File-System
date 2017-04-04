@@ -212,4 +212,22 @@ public class VirtualDisk{
             System.out.println("Refresh fail");
         }
     }
+
+    public boolean  move(String name, String path){
+        VFSUnit child = this.currentPath.getChild(name);
+        PathParser parser = new PathParser(path, currentPath.getContent());
+        String[] outDir = parser.getElement();
+        VFSUnit temp = this.content;
+        for(String e: outDir){
+            temp = temp.getChild(e);
+            if(temp == null)
+                return false;
+        }
+        if(temp instanceof VFSFile){
+            return false;
+        }
+        child.move((Directory) temp);
+        return true;
+    }
+
 }
