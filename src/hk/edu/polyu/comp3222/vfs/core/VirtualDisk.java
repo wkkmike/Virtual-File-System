@@ -145,7 +145,7 @@ public class VirtualDisk implements Serializable{
         this.lastModify = this.content.getLastModify();
     }
 
-    public boolean  move(String name, String path){
+    public boolean move(String name, String path){
         VFSUnit child = this.currentPath.getChild(name);
         PathParser parser = new PathParser(path, currentPath);
         String[] outDir = parser.getElement();
