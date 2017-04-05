@@ -195,9 +195,8 @@ public class VirtualDisk{
         return this.currentPath.addChild(newFile);
     }
 
-    public boolean displayCurrentPath(){
-        System.out.println(this.currentPath.getDisplayName());
-        return true;
+    public String getCurrentPath(){
+        return this.currentPath.getDisplayName();
     }
 
     private void refresh(){
