@@ -12,8 +12,8 @@ import java.util.List;
  */
 public class SearchCmd implements Command {
     public String command(ArrayList<String> cmd, IOService ioService, VirtualDisk disk){
-        if(cmd.size() == 1){
-            ioService.printLine("search command needs at least one argument");
+        if(cmd.size() < 3){
+            ioService.printLine("search command needs at least three argument");
         }else{
             String option1 = cmd.get(1);
             String option2 = cmd.get(2);

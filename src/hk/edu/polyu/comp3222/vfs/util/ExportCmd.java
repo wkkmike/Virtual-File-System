@@ -2,13 +2,12 @@ package hk.edu.polyu.comp3222.vfs.util;
 
 import hk.edu.polyu.comp3222.vfs.core.VirtualDisk;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
  * Created by lidawei on 06/04/2017.
  */
-public class ImportCmd implements Command {
+public class ExportCmd implements Command {
     public String command(ArrayList<String> cmd, IOService ioService, VirtualDisk disk){
         ioService.printLine("This is the import.");
         String path = null;
@@ -18,14 +17,12 @@ public class ImportCmd implements Command {
         } else {
             ioService.printLine("Wrong Argument for touch command");
         }
-        result = disk.importFile(path);
+        result = disk.exportFile(path);
 
         if(result == false){
-            ioService.printLine("import failed");
+            ioService.printLine("export failed");
         }
 
         return disk.getCurrentPath();
     }
 }
-
-

@@ -13,14 +13,18 @@ public class MoveCmd implements Command {
         ioService.printLine("This is the mv command.");
         String dirName = null;
         String name = null;
+        boolean result = false;
         if (cmd.size() > 2 && !cmd.get(1).equals(null) && !cmd.get(2).equals(null) ) {
             name = cmd.get(1);
             dirName = cmd.get(2);
         }
         else {
-            ioService.printLine("Wrong Argument for touch command");
+            ioService.printLine("Wrong Argument for move command");
         }
-        disk.move(name, dirName);
+        result = disk.move(name, dirName);
+        if(result == false){
+            ioService.printLine("mv failed");
+        }
 
         return disk.getCurrentPath();
     }

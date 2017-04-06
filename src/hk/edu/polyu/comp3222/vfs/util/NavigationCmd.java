@@ -11,15 +11,19 @@ import java.util.ArrayList;
  */
 public class NavigationCmd implements Command {
     public String command(ArrayList<String> cmd, IOService ioService, VirtualDisk disk){
-        //ioService.printLine(String.valueOf(cmd.length));
+        boolean result = false;
         if(cmd.size() == 1){
              disk.changeDirectory(null);
         }else{
             String path = cmd.get(1);
-            Boolean result = disk.changeDirectory(path);
+            result = disk.changeDirectory(path);
             if(result == false){
                 ioService.printLine("no such directory");
             }
+        }
+
+        if(result == false){
+            ioService.printLine("cd failed");
         }
         return disk.getCurrentPath();
 

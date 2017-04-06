@@ -10,13 +10,27 @@ import java.util.ArrayList;
 public class TouchCmd implements Command {
     public String command(ArrayList<String> cmd, IOService ioService, VirtualDisk disk){
         //ioService.printLine("This is the touch handler.");
-        String fileName = null;
-        if (cmd.size() > 1 && !cmd.get(1).equals(null)) {
-            fileName = cmd.get(1);
+        String name = null;
+        String option = null;
+        boolean result = false;
+        if (cmd.size() <= 2) {
+            ioService.printLine("touch need two argument");
+
         } else {
-            ioService.printLine("Wrong Argument for touch command");
+            option = cmd.get(1);
+            name = cmd.get(2);
         }
-        disk.createFile(fileName,null);
+        if(option.equals("file")){
+            result = disk.createFile(name,null);
+        }
+        if(option.equals("dir")){
+            result = disk.createDirectory(name);
+        }
+
+        if(result == false){
+            ioService.printLine("Touch failed");
+        }
+
         return disk.getCurrentPath();
     }
 }

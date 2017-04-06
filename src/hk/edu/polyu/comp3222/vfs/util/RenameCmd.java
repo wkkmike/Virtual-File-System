@@ -12,6 +12,7 @@ public class RenameCmd implements Command {
     public String command(ArrayList<String> cmd, IOService ioService, VirtualDisk disk){
         String originName = null;
         String newName = null;
+        boolean result = false;
         if (cmd.size() > 1 && !cmd.get(1).equals(null) && !cmd.get(2).equals(null)) {
             originName = cmd.get(1);
             newName = cmd.get(2);
@@ -20,6 +21,10 @@ public class RenameCmd implements Command {
         }
         ioService.printLine("This is the rename command");
         disk.rename(originName, newName);
+
+        if(result == false){
+            ioService.printLine("rename failed");
+        }
         return disk.getCurrentPath();
     }
 }

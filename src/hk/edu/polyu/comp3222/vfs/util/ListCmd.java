@@ -11,7 +11,11 @@ import java.util.ArrayList;
  */
 public class ListCmd implements Command {
     public String command(ArrayList<String> cmd, IOService ioService, VirtualDisk disk){
-        disk.listChildren();
+        boolean result = false;
+        result = disk.listChildren();
+        if(result == false){
+            ioService.printLine("ls failed");
+        }
         return disk.getCurrentPath();
     }
 }
