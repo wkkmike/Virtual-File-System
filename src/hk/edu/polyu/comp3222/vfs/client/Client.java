@@ -7,7 +7,8 @@ import hk.edu.polyu.comp3222.vfs.core.VirtualDisk;
  */
 public abstract class Client {
     VirtualDisk disk = null;
-    public Client(VirtualDisk disk){
+    public Client(){}
+    public void setDisk(VirtualDisk disk){
         this.disk = disk;
     }
     public void action(){}

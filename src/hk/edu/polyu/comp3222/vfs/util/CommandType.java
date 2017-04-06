@@ -13,7 +13,8 @@ public enum CommandType{
     CD("cd"),
     MKDIR("mkdir"),
     HELP("help"),
-    COPY("cp");
+    COPY("cp"),
+    LINK("link");
 
     private String command;
 
