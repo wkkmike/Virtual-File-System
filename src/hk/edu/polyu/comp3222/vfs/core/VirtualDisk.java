@@ -110,7 +110,6 @@ public class VirtualDisk implements Serializable{
 
     public boolean listChildren(){
         for(VFSUnit f: this.currentPath.getChildren().values()){
-            System.out.println(f.getName());
             System.out.println(f.toString());
         }
         return true;
@@ -153,18 +152,12 @@ public class VirtualDisk implements Serializable{
 
     public boolean move(String name, String path){
         VFSUnit child = this.currentPath.getChild(name);
-        PathParser parser = new PathParser(path, currentPath);
-        String[] outDir = parser.getElement();
-        VFSUnit temp = this.content;
-        for(String e: outDir){
-            temp = temp.getChild(e);
-            if(temp == null)
-                return false;
-        }
+        VFSUnit temp = getVFSUnitByPath(path);
+        if(temp == null) return false;
         if(temp instanceof VFSFile){
             return false;
         }
-        child.move((Directory) temp);
+        this.currentPath.move(child, (Directory) temp);
         return true;
     }
 

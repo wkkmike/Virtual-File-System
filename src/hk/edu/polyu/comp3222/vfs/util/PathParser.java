@@ -13,17 +13,13 @@ public class PathParser implements Parser{
     private String path;
 
     public PathParser(String command, VFSUnit currentPath){
-        String paths[] = command.split("/");
-        if(paths[0] == "."){
-            path = currentPath.getDisplayName() + "/";
-            for(int i=1; i<paths.length; i++){
-                if(paths[i] == " ") continue;
-                path += (paths[i] + "/");
-            }
+        if(command.charAt(0) == '.'){
+            path = currentPath.getDisplayName() + command.substring(1);
         }
         else{
             path = command;
         }
+        System.out.println(path);
     }
 
     public String[] getElement(){

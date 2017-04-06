@@ -37,12 +37,14 @@ public class Directory implements VFSUnit{
     }
 
     @Override
-    public boolean move(Directory path) {
-        if(path.haveChild(this.name)){
+    public boolean move(VFSUnit child, Directory path) {
+        if(path.haveChild(child.getName())){
             return false;
         }
-        path.addChild(this);
-        this.delete();
+        VFSUnit temp = child;
+        String childName = child.getName();
+        this.children.remove(childName);
+        path.addChild(temp);
         return true;
     }
 
@@ -92,6 +94,10 @@ public class Directory implements VFSUnit{
     public boolean copy(Directory file){
         if(file.haveChild(name)){
             return false;
+        }
+        Directory out = new Directory(this.name, file, new Date());
+        for(VFSUnit f: children.values()){
+            f.copy(out);
         }
         file.addChild(this);
         return true;
@@ -211,6 +217,7 @@ public class Directory implements VFSUnit{
     public boolean addChild(VFSUnit child){
         if(haveChild(child.getName())) return false;
         this.children.put(child.getName(), child);
+        child.changeParent(this);
         this.changeSize(child.getSize());
         return true;
     }
@@ -218,7 +225,7 @@ public class Directory implements VFSUnit{
     @Override
     public boolean deleteChild(String name){
         for(VFSUnit f: children.values()){
-            if(f.getName() == name){
+            if(f.getName().equals(name)){
                 f.delete();
                 children.remove(name);
                 return true;
@@ -248,9 +255,10 @@ public class Directory implements VFSUnit{
 
     @Override
     public VFSUnit getChild(String name) {
-        for(VFSUnit f: children.values()){
-            if(f.getName() == name)
-                return f;
+        for(String f: children.keySet()){
+            if(f.equals(name)){
+                return children.get(f);
+            }
         }
         return null;
     }
@@ -267,7 +275,7 @@ public class Directory implements VFSUnit{
         String date = this.lastMotify.toString();
         String name = this.getName();
         String out;
-        out = String.format("%s %15s %s %20s",type, size, date, name);
+        out = String.format("%s %15s %s %sbyte",type, name, date, size);
         return out;
     }
 
@@ -280,6 +288,15 @@ public class Directory implements VFSUnit{
             return false;
         }
         child.rename(newName);
+        VFSUnit temp = child;
+        this.children.remove(originName);
+        this.children.put(newName, temp);
+        return true;
+    }
+
+    @Override
+    public boolean changeParent(VFSUnit parent) {
+        this.parent = parent;
         return true;
     }
 }
