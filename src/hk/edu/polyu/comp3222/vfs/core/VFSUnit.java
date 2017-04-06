@@ -15,7 +15,7 @@ public interface VFSUnit extends Serializable {
 
     boolean delete();
 
-    boolean move(Directory path);
+    boolean move(VFSUnit child, Directory path);
 
     long getSize();
 
@@ -60,4 +60,6 @@ public interface VFSUnit extends Serializable {
     List<VFSUnit> searchDirectory(String key[], boolean caseSensitive);
 
     boolean changeChildName(String originName, String newName);
+
+    boolean changeParent(VFSUnit parent);
 }

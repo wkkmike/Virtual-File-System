@@ -39,12 +39,7 @@ public class VFSFile implements VFSUnit {
     }
 
 
-    public boolean move(Directory path) {
-        if(path.haveChild(this.name)){
-            return false;
-        }
-        path.addChild(this);
-        this.delete();
+    public boolean move(VFSUnit child, Directory path) {
         return true;
     }
 
@@ -93,7 +88,8 @@ public class VFSFile implements VFSUnit {
         if(file.haveChild(name)){
             return false;
         }
-        file.addChild(this);
+        VFSUnit out = new VFSFile(this.getName(), file, this.lastMotify, this.content);
+        file.addChild(out);
         return true;
     }
 
@@ -113,7 +109,7 @@ public class VFSFile implements VFSUnit {
         String date = this.lastMotify.toString();
         String name = this.getName();
         String out;
-        out = String.format("%s %15s %s %20s",type, size, date, name);
+        out = String.format("%s %15s %s %10sbyte",type, name, date, size);
         return out;
     }
 
@@ -126,7 +122,7 @@ public class VFSFile implements VFSUnit {
 
     @Override
     public boolean changeSize(long size) {
-        this.size += size;
+        if(this.parent == null) return true;
         this.parent.changeSize(size);
         return true;
     }
@@ -197,6 +193,12 @@ public class VFSFile implements VFSUnit {
     @Override
     public boolean changeChildName(String originName, String newName) {
         return false;
+    }
+
+    @Override
+    public boolean changeParent(VFSUnit parent) {
+        this.parent = parent;
+        return true;
     }
 
     @Override
