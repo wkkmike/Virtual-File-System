@@ -2,7 +2,7 @@ package hk.edu.polyu.comp3222.vfs.core;
 
 import java.io.*;
 import java.util.Date;
-import hk.edu.polyu.comp3222.vfs.util.Parser;
+import java.util.List;
 import hk.edu.polyu.comp3222.vfs.util.PathParser;
 
 /**
@@ -22,7 +22,7 @@ public class VirtualDisk implements Serializable{
 
     public VirtualDisk(String name, long size, String file){
         this.name = name;
-        this.content = new Directory(name, null, new Date());
+        this.content = new Directory("root", null, new Date());
         this.currentPath = this.content;
         this.size = size;
         this.occupySize = 0;
@@ -81,14 +81,8 @@ public class VirtualDisk implements Serializable{
     }
 
     public boolean changeDirectory(String path){
-        PathParser parser = new PathParser(path, currentPath);
-        String[] element = parser.getElement();
-        VFSUnit temp = this.content;
-        for(String e: element){
-            temp = temp.getChild(e);
-            if(temp == null)
-                return false;
-        }
+        VFSUnit temp = this.getVFSUnitByPath(path);
+        if(temp == null) return false;
         currentPath = temp;
         return true;
     }
@@ -195,5 +189,35 @@ public class VirtualDisk implements Serializable{
             i.printStackTrace();
         }
         return true;
+    }
+
+    public VFSUnit getVFSUnitByPath(String path){
+        PathParser parser = new PathParser(path, currentPath);
+        String[] element = parser.getElement();
+        VFSUnit temp = this.content;
+        if(element.length == 0) return temp;
+        for(int i=1; i<element.length; i++){
+            temp = temp.getChild(element[i]);
+            if(temp == null)
+                return null;
+        }
+        if(temp.isVFSFile()) return null;
+        return temp;
+    }
+
+    public List<VFSUnit> search(String path, String key[], boolean caseSensitive){
+        if(path == null) path = this.currentPath.getDisplayName();
+        return this.getVFSUnitByPath(path).search(key, caseSensitive);
+    }
+
+    public List<VFSUnit> searchFile(String path, String key[], boolean caseSensitive){
+        if(path == null) path = this.currentPath.getDisplayName();
+        return this.getVFSUnitByPath(path).searchFile(key, caseSensitive);
+    }
+
+    public List<VFSUnit> searchDirectory(String path, String key[], boolean caseSensitive){
+        if(path == null) path = this.currentPath.getDisplayName();
+        if(path == "root/") path = "root/root";
+        return this.getVFSUnitByPath(path).searchDirectory(key, caseSensitive);
     }
 }

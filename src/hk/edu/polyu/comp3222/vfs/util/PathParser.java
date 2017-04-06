@@ -17,7 +17,8 @@ public class PathParser implements Parser{
         if(paths[0] == "."){
             path = currentPath.getDisplayName() + "/";
             for(int i=1; i<paths.length; i++){
-                path += paths[i];
+                if(paths[i] == " ") continue;
+                path += (paths[i] + "/");
             }
         }
         else{
