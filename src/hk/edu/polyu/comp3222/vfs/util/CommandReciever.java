@@ -74,6 +74,12 @@ public class CommandReciever {
             case "delete":
                 DeleteCmd del = new DeleteCmd();
                 del.command(cmd,output,disk);
+            case "export":
+                ExportCmd ex = new ExportCmd();
+                ex.command(cmd,output,disk);
+            case "connect":
+                ConnectCmd con = new ConnectCmd();
+                con.command(output, disk);
 
         }
 

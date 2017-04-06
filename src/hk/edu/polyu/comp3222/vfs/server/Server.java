@@ -1,10 +1,13 @@
 package hk.edu.polyu.comp3222.vfs.server;
 
 
+import hk.edu.polyu.comp3222.vfs.client.Client;
+
 import java.io.*;
 import java.net.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Scanner;
 
 /**
@@ -12,6 +15,14 @@ import java.util.Scanner;
  */
 public class Server {
     private static final Server INSTANCE = new Server();
+    private ServerSocket server;
+    private Socket client;
+    private BufferedReader in;
+    private PrintWriter out;
+    private String name;
+    private String pw;
+    private String choice;
+    private HashMap<String, String> accInfo;
 
     private Server() {
         if (INSTANCE != null) {
@@ -19,50 +30,52 @@ public class Server {
         }
     }
 
-    public static Server getInstance() {
-        return INSTANCE;
-    }
+    public void listenSocket() {
+        try {
+            server = new ServerSocket(8888);
+        } catch (IOException e) {
+            System.out.println("Could not listen on port 8888");
+            System.exit(-1);
+        }
 
-    public void receiveFile(String savePath,String ip,int port){
-        Socket socket=null;
-        try {
-            socket = new Socket(ip,port);
-        } catch (UnknownHostException e1) {
-            e1.printStackTrace();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        DataInputStream dis=null;
-        try {
-            dis = new DataInputStream(new BufferedInputStream(socket
-                    .getInputStream()));
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        int bufferSize = 1024;
-        byte[] buf = new byte[bufferSize];
-        int passedlen = 0;
         try{
-            savePath += dis.readUTF();
-            DataOutputStream fileOut = new DataOutputStream(
-                    new BufferedOutputStream(new BufferedOutputStream(
-                            new FileOutputStream(savePath))));
-            while (true) {
-                int read = 0;
-                if (dis != null) {
-                    read = dis.read(buf);
-                }
-                passedlen += read;
-                if (read == -1) {
-                    break;
-                }
-                fileOut.write(buf, 0, read);
-            }
-            fileOut.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
+            client = server.accept();
+        } catch (IOException e) {
+            System.out.println("Accept failed: 4321");
+            System.exit(-1);
         }
+
+        try{
+            in = new BufferedReader(new InputStreamReader(
+                    client.getInputStream()));
+            out = new PrintWriter(client.getOutputStream(),
+                    true);
+        } catch (IOException e) {
+            System.out.println("Read failed");
+            System.exit(-1);
+        }
+
+        try{
+            name = in.readLine();
+            pw = in.readLine();
+            choice = in.readLine();
+        } catch (IOException e) {
+            System.out.println("Read failed");
+            System.exit(-1);
+        }
+
+        if(choice.equals("l")){
+            if(accInfo.get(name).equals(pw)){
+                out.println("s");
+            }
+            else out.println("w");
+        }
+        else if(choice.equals("s")){
+            accInfo.put(name,pw);
+        }
+        else out.println("n");
+
+
     }
 
 }
