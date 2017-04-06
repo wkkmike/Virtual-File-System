@@ -87,7 +87,8 @@ public class VirtualDisk implements Serializable{
         return true;
     }
 
-    public boolean importFile(File importFile){
+    public boolean importFile(String fileName){
+        File importFile = new File(fileName);
         if(!importFile.exists()){
             return false;
         }
@@ -161,7 +162,8 @@ public class VirtualDisk implements Serializable{
         return true;
     }
 
-    public boolean exportFile(File export){
+    public boolean exportFile(String path){
+        File export = new File(path);
         if(!export.exists()) return false;
         if(!export.isDirectory()) return false;
         try {
@@ -215,9 +217,17 @@ public class VirtualDisk implements Serializable{
         return this.getVFSUnitByPath(path).searchFile(key, caseSensitive);
     }
 
+    public boolean copy(String name, String path){
+        VFSUnit copyDes = getVFSUnitByPath(path);
+        VFSUnit copyOrigin = this.currentPath.getChild(name);
+        if(copyDes == null || copyOrigin == null) return false;
+        if(copyDes.isVFSFile()) return false;
+        return copyOrigin.copy((Directory) copyDes);
+    }
+
     public List<VFSUnit> searchDirectory(String path, String key[], boolean caseSensitive){
         if(path == null) path = this.currentPath.getDisplayName();
-        if(path == "root/") path = "root/root";
+        if(path.equals("root/")) path = "root/root";
         return this.getVFSUnitByPath(path).searchDirectory(key, caseSensitive);
     }
 }
