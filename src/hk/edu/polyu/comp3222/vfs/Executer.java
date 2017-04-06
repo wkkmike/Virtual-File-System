@@ -1,5 +1,7 @@
 package hk.edu.polyu.comp3222.vfs;
 
+import hk.edu.polyu.comp3222.vfs.client.Client;
+import hk.edu.polyu.comp3222.vfs.client.ClientOff;
 import hk.edu.polyu.comp3222.vfs.client.ClientOn;
 import hk.edu.polyu.comp3222.vfs.util.IOService;
 
@@ -11,11 +13,8 @@ public class Executer {
     private static final int SERVER_PORT = 8888;
     public static IOService clientCmd;
 
-    Executer(IOService clientCmd){
-        this.clientCmd = clientCmd;
-    }
-
-    public static void main(String[] args){
-        ClientOn client = new ClientOn();
+    public static void main(String args[]){
+        ClientOff client = new ClientOff();
+        client.action();
     }
 }

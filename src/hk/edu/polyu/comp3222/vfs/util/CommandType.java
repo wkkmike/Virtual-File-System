@@ -14,7 +14,8 @@ public enum CommandType{
     MKDIR("mkdir"),
     HELP("help"),
     COPY("cp"),
-    LINK("link");
+    LINK("link"),
+    IMPORT("import");
 
     private String command;
 

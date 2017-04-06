@@ -39,7 +39,6 @@ public class ClientOn extends Client{
     public void action(){
         while(true) {
             String cmd = Executer.clientCmd.readLine();
-
         }
     }
 }

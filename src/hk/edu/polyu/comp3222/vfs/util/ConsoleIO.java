@@ -23,23 +23,11 @@ public class ConsoleIO implements IOService {
     private boolean isTest;
 
 
-    /**
-     * constructor
-     * @param isTest whether it is testing
-     * @param strings strings needed for testing
-     */
-    ConsoleIO(boolean isTest, String[] strings){
-        this.isTest=isTest;
-        if(isTest){
-            inputTest= new LinkedList<>();
-            outputTest= new LinkedList<>();
-            Collections.addAll(inputTest, strings);
-        }
-        else{
-            input = new Scanner(System.in);
-            output=new PrintStream(System.out);
-        }
+    public ConsoleIO(){
+        input = new Scanner(System.in);
+        output=new PrintStream(System.out);
     }
+
     @Override
     public String readLine() {
         if(isTest){

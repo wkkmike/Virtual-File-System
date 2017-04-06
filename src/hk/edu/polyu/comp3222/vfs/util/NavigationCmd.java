@@ -13,7 +13,7 @@ public class NavigationCmd implements Command {
     public String command(ArrayList<String> cmd, IOService ioService, VirtualDisk disk){
         boolean result = false;
         if(cmd.size() == 1){
-             disk.changeDirectory(null);
+             disk.changeDirectory();
         }else{
             String path = cmd.get(1);
             result = disk.changeDirectory(path);

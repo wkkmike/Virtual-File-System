@@ -61,6 +61,7 @@ public class VirtualDisk implements Serializable{
     }
 
     public long getRemainSize(){
+        this.occupySize = this.content.getSize();
         return size - occupySize;
     }
 
@@ -99,6 +100,11 @@ public class VirtualDisk implements Serializable{
             System.out.println("import fail");
         }
         this.refresh();
+        if(this.getRemainSize() < 0){
+            this.currentPath.deleteChild(fileName);
+            System.out.println("Don't have enough space");
+            return false;
+        }
         return true;
     }
 
@@ -220,9 +226,14 @@ public class VirtualDisk implements Serializable{
     public boolean copy(String name, String path){
         VFSUnit copyDes = getVFSUnitByPath(path);
         VFSUnit copyOrigin = this.currentPath.getChild(name);
+        if(copyOrigin.getSize() > this.getRemainSize()){
+            System.out.println("Don't have enough space");
+            return false;
+        }
         if(copyDes == null || copyOrigin == null) return false;
         if(copyDes.isVFSFile()) return false;
-        return copyOrigin.copy((Directory) copyDes);
+        if(!copyOrigin.copy((Directory) copyDes)) return false;
+        return true;
     }
 
     public List<VFSUnit> searchDirectory(String path, String key[], boolean caseSensitive){

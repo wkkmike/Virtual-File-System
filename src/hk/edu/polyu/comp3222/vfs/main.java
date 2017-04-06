@@ -13,14 +13,16 @@ import java.io.ObjectInputStream;
 public class main {
     public static void main(String args[]){
         //C:/Users/michael/Desktop/test
+        /*
         VirtualDisk test = new VirtualDisk("wkk", 10000000000L, "C:/Users/michael/Desktop/test/");
-        File tt = new File("C:/Users/michael/Desktop/aa");
+        String tt = "C:/Users/michael/Desktop/aa";
         test.importFile(tt);
         File ha = new File("C:/Users/michael/Desktop/a");
         export(test, ha);
         System.out.println(test.getCurrentPath());
         test.listChildren();
         test.store();
+        */
     }
 
     public static void export(VirtualDisk d, File name){
@@ -38,6 +40,6 @@ public class main {
             c.printStackTrace();
             return;
         }
-        d.exportFile(name);
+        d.exportFile(name.getPath());
     }
 }

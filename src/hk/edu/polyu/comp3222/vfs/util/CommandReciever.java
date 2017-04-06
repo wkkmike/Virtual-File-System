@@ -13,49 +13,52 @@ public class CommandReciever {
     public CommandReciever() {
     }
 
-    public void execute(CommandType c, ArrayList<String> cmd, IOService output, VirtualDisk disk) {
-        switch (c) {
-            case COPY:
+    public void execute(String command, ArrayList<String> cmd, IOService output, VirtualDisk disk) {
+        switch (command) {
+            case "cp":
                 CopyCmd copy = new CopyCmd();
                 copy.command(cmd, output, disk);
                 break;
-            case CD:
+            case "cd":
                 NavigationCmd cd = new NavigationCmd();
                 cd.command(cmd, output, disk);
                 break;
-            case LIST:
+            case "ls":
                 ListCmd ls = new ListCmd();
                 ls.command(cmd, output, disk);
                 break;
-            case MKDIR:
+            case "mkdir":
                 MkdirCmd mk = new MkdirCmd();
                 mk.command(cmd, output, disk);
                 break;
-            case MOVE:
+            case "mv":
                 MoveCmd mv = new MoveCmd();
                 mv.command(cmd, output, disk);
                 break;
-            case QUIT:
+            case "q":
                 QuitCmd q = new QuitCmd();
                 q.command(cmd, output, disk);
                 break;
-            case RENAME:
+            case "rename":
                 RenameCmd r = new RenameCmd();
                 r.command(cmd, output, disk);
                 break;
-            case SEARCH:
+            case "search":
                 SearchCmd s = new SearchCmd();
                 s.command(cmd, output, disk);
                 break;
-            case HELP:
+            case "help":
                 HelpCmd h = new HelpCmd();
                 h.command(cmd, output, disk);
                 break;
-            case TOUCH:
+            case "touch":
                 TouchCmd t = new TouchCmd();
                 t.command(cmd, output, disk);
                 break;
-
+            case "import":
+                ImportCmd i = new ImportCmd();
+                i.command(cmd, output, disk);
+                break;
         }
 
     }

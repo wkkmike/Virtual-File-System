@@ -21,7 +21,7 @@ public class ClientOff extends Client {
 
     @Override
     public void action() {
-        IOService output = null;
+        IOService output = new ConsoleIO();
         while (true) {
             output.printLine("link or create a disk");
             String choice = output.readLine();
@@ -54,21 +54,23 @@ public class ClientOff extends Client {
                 this.setDisk(disk);
                 break;
             }
-
-
-            while (true) {
-                String input = output.readLine();
-                StringTokenizer st = new StringTokenizer(input, " ");
-                ArrayList<String> cmd = null;
-                int count = 0;
-                while (st.hasMoreTokens()) {
-                    cmd.add(st.nextToken());
-                }
-                CommandType c = CommandType.valueOf(cmd.get(0));
-                CommandReciever receiver = new CommandReciever();
-                receiver.execute(c, cmd, output, disk);
-
+        }
+        while (true) {
+            output.printLine(disk.getCurrentPath() + "> ");
+            String input = output.readLine();
+            StringTokenizer st = new StringTokenizer(input, " ");
+            ArrayList<String> cmd = new ArrayList<String>();
+            int count = 0;
+            while (st.hasMoreTokens()) {
+                cmd.add(st.nextToken());
             }
+            String cmd1 = "foo";
+            if(cmd.size() > 0){
+                cmd1 = cmd.get(0);
+            }
+            CommandReciever receiver = new CommandReciever();
+            receiver.execute(cmd1, cmd, output, disk);
+
         }
     }
 }
