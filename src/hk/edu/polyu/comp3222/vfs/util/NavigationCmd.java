@@ -21,10 +21,6 @@ public class NavigationCmd implements Command {
                 ioService.printLine("no such directory");
             }
         }
-
-        if(result == false){
-            ioService.printLine("cd failed");
-        }
         return disk.getCurrentPath();
 
     }

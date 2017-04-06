@@ -59,6 +59,22 @@ public class CommandReciever {
                 ImportCmd i = new ImportCmd();
                 i.command(cmd, output, disk);
                 break;
+            case "store":
+                StoreCmd store = new StoreCmd();
+                store.command(cmd,output,disk);
+                break;
+            case "remain":
+                RemainSizeCmd remain = new RemainSizeCmd();
+                remain.command(cmd,output,disk);
+                break;
+            case "occupy":
+                OccupiedSizeCmd occupy = new OccupiedSizeCmd();
+                occupy.command(cmd,output,disk);
+                break;
+            case "delete":
+                DeleteCmd del = new DeleteCmd();
+                del.command(cmd,output,disk);
+
         }
 
     }

@@ -17,6 +17,7 @@ public enum CommandType{
     LINK("link"),
     IMPORT("import");
 
+
     private String command;
 
     private CommandType(String command) {
