@@ -17,8 +17,8 @@ public class ClientOn extends Client{
 
     private String account;
 
-    public ClientOn(VirtualDisk disk){
-        super(disk);
+    public ClientOn(){
+        super();
     }
 
     public void connect(){

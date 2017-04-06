@@ -55,6 +55,7 @@ public class CommandReciever {
                 TouchCmd t = new TouchCmd();
                 t.command(cmd, output, disk);
                 break;
+
         }
 
     }
