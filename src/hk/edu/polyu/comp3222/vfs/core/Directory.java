@@ -8,78 +8,54 @@ import java.util.*;
  */
 public class Directory implements VFSUnit{
     private Date lastMotify;
-    private File content;
-    private List<VFSUnit> children = new LinkedList<>();
+    private String name;
+    private Map<String, VFSUnit> children = new HashMap<>();
     private VFSUnit parent;
     private long size;
 
-    public Directory(File file, VFSUnit parent){
+    public Directory(String name, VFSUnit parent, Date createDate){
         this.parent = parent;
-        this.content = file;
-        file.mkdirs();
-        for(File child: file.listFiles()){
-            VFSUnit out = null;
-            if(child.isFile()){
-                out = new VFSFile(child, this);
-            }
-            else{
-                out = new Directory(child, this);
-            }
-            children.add(out);
-        }
+        this.name = name;
         this.size = 0;
-        this.lastMotify = new Date(this.content.lastModified());
+        this.lastMotify = createDate;
     }
 
     @Override
     public boolean rename(String name) {
-        String out = this.content.getParent() + "/" + name;
-        File newFile = new File(out);
-        if(newFile.exists()){
-            return false;
-        }
-        else{
-            this.content.renameTo(newFile);
-            this.changeLastModify();
-        }
+        this.name = name;
         return true;
     }
 
     @Override
     public boolean delete() {
-        for(VFSUnit child: children){
-            child.delete();
+        for(VFSUnit child: children.values()){
+            Boolean flag = child.delete();
+            if(!flag) return false;
         }
-        this.content.delete();
+        this.children = null;
         return true;
     }
 
     @Override
     public boolean move(Directory path) {
-        if(!path.getContent().exists()){
+        if(path.haveChild(this.name)){
             return false;
         }
-        File out = new File(path.getPath() + "/" + this.getName());
-        if(out.exists()){
-            return false;
-        }
-        if(this.content.renameTo(out)){
-            this.parent.changeLastModify();
-            this.parent.changeSize(-this.size);
-        }
-        return false;
+        path.addChild(this);
+        this.delete();
+        return true;
     }
 
     @Override
     public long getSize() {
         long size = 0;
-        for(VFSUnit file: children){
+        for(VFSUnit file: children.values()){
             size += file.getSize();
         }
         return size;
     }
 
-    public List<VFSUnit> getChildren(){
+    public Map<String, VFSUnit> getChildren(){
        return this.children;
     }
 
@@ -90,7 +66,7 @@ public class Directory implements VFSUnit{
 
     @Override
     public String getName() {
-        return this.content.getName();
+        return this.name;
     }
 
     @Override
@@ -102,31 +78,22 @@ public class Directory implements VFSUnit{
         if(outFile.exists()){
             return false;
         }
-        Directory outVFS = new Directory(name, null);
-        if(this.copy(outVFS))
-            return true;
-        return false;
-    }
-
-    public String getPath(){
-        return this.content.getPath();
+        if(!outFile.mkdir()){
+            return false;
+        }
+        for(VFSUnit child: children.values()){
+            boolean flag = child.export(outFile);
+            if(!flag) return false;
+        }
+        return true;
     }
 
     @Override
-    public boolean copy(Directory file) throws IOException{
-        if(!file.getContent().exists()){
+    public boolean copy(Directory file){
+        if(file.haveChild(name)){
             return false;
         }
-        File out = new File(file.getPath() + "/" + this.getName());
-        if(out.exists()){
-            return false;
-        }
-        out.mkdirs();
-        Directory outUnit = new Directory(out, file);
-        for(VFSUnit child: children){
-            child.copy(outUnit);
-        }
-        file.addChild(outUnit);
+        file.addChild(this);
         return true;
     }
 
@@ -136,13 +103,41 @@ public class Directory implements VFSUnit{
     }
 
     public boolean importFile(File file) throws IOException{
-        if(file.isFile()){
-            VFSUnit temp = new VFSFile(file, null);
-            temp.copy(this);
+        if(!file.exists()){
+            return false;
         }
-        else{
-            VFSUnit temp = new Directory(file, null);
-            temp.copy(this);
+        if(haveChild(file.getName())){
+            return false;
+        }
+        if(file.isFile()){
+            InputStream input = null;
+            ByteArrayOutputStream output = null;
+            byte[] out;
+            try {
+                input = new FileInputStream(file);
+                output = new ByteArrayOutputStream();
+                byte[] buf = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = input.read(buf)) > 0) {
+                    output.write(buf, 0, bytesRead);
+                }
+            }
+            finally {
+                input.close();
+                output.close();
+            }
+            out = output.toByteArray();
+            VFSUnit child = new VFSFile(file.getName(), this, new Date(), out);
+            addChild(child);
+            return true;
+        }
+        if(file.isDirectory()){
+            VFSUnit child = new Directory(file.getName(), this, new Date());
+            addChild(child);
+            for(File f: file.listFiles()){
+                boolean flag = child.importFile(f);
+                if(!flag) return false;
+            }
         }
         return true;
     }
@@ -154,16 +149,78 @@ public class Directory implements VFSUnit{
         return this.parent.getDisplayName() + "/" + this.getName();
     }
 
+    @Override
+    public boolean haveChild(String name) {
+        if(children.containsKey(name)) return true;
+        return false;
+    }
+
+    @Override
+    public List<VFSUnit> search(String[] key, boolean caseSensitive) {
+        List<VFSUnit> out = new LinkedList<>();
+        for(VFSUnit child: children.values()){
+            out.addAll(child.search(key, caseSensitive));
+        }
+        boolean flag = true;
+        if(!caseSensitive){
+            String newName = this.name.toUpperCase();
+            for(String keyword: key){
+                if(!newName.contains(keyword.toUpperCase())) flag = false;
+            }
+        }
+        else{
+            for(String keyword: key){
+                if(!this.name.contains(keyword)) flag = false;
+            }
+        }
+        if(flag) out.add(this);
+        return out;
+    }
+
+    @Override
+    public List<VFSUnit> searchFile(String[] key, boolean caseSensitive) {
+        List<VFSUnit> out = new LinkedList<>();
+        for(VFSUnit child: children.values()){
+            out.addAll(child.searchFile(key, caseSensitive));
+        }
+        return out;
+    }
+
+    @Override
+    public List<VFSUnit> searchDirectory(String[] key, boolean caseSensitive) {
+        List<VFSUnit> out = new LinkedList<>();
+        for(VFSUnit child: children.values()){
+            out.addAll(child.searchFile(key, caseSensitive));
+        }
+        boolean flag = true;
+        if(!caseSensitive){
+            String newName = this.name.toUpperCase();
+            for(String keyword: key){
+                if(!newName.contains(keyword.toUpperCase())) flag = false;
+            }
+        }
+        else{
+            for(String keyword: key){
+                if(!this.name.contains(keyword)) flag = false;
+            }
+        }
+        if(flag) out.add(this);
+        return out;
+    }
+
     public boolean addChild(VFSUnit child){
-        this.children.add(child);
+        if(haveChild(child.getName())) return false;
+        this.children.put(child.getName(), child);
+        this.changeSize(child.getSize());
         return true;
     }
 
-    public boolean deleteChild(VFSUnit child){
-        for(VFSUnit f: children){
-            if(f.equals(child)){
-                child.delete();
-                children.remove(f);
+    @Override
+    public boolean deleteChild(String name){
+        for(VFSUnit f: children.values()){
+            if(f.getName() == name){
+                f.delete();
+                children.remove(name);
                 return true;
             }
         }
@@ -174,16 +231,12 @@ public class Directory implements VFSUnit{
         return false;
     }
 
-    @Override
-    public File getContent() {
-        return this.content;
-    }
-
     public boolean changeSize(long size){
         this.size += size;
         if(this.parent == null){
             return true;
         }
+        this.size = this.getSize();
         this.parent.changeSize(size);
         return true;
     }
@@ -195,7 +248,7 @@ public class Directory implements VFSUnit{
 
     @Override
     public VFSUnit getChild(String name) {
-        for(VFSUnit f: children){
+        for(VFSUnit f: children.values()){
             if(f.getName() == name)
                 return f;
         }
@@ -203,15 +256,9 @@ public class Directory implements VFSUnit{
     }
 
     public boolean changeLastModify(){
-        this.lastMotify = new Date(this.content.lastModified());
+        this.lastMotify = new Date();
         this.parent.changeLastModify();
         return true;
-    }
-    
-    public boolean equals(VFSUnit other){
-        if(other.getContent().equals(this.content) && other.getLastModify() == this.lastMotify)
-            return true;
-        return false;
     }
 
     public String toString(){
@@ -222,5 +269,17 @@ public class Directory implements VFSUnit{
         String out;
         out = String.format("%s %15s %s %20s",type, size, date, name);
         return out;
+    }
+
+    public boolean changeChildName(String originName, String newName){
+        VFSUnit child = getChild(originName);
+        if(child == null){
+            return false;
+        }
+        if(haveChild(newName)){
+            return false;
+        }
+        child.rename(newName);
+        return true;
     }
 }

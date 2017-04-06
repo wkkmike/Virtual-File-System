@@ -1,15 +1,25 @@
 package hk.edu.polyu.comp3222.vfs.core;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
  * Created by michael on 2017/4/2.
  */
-public class VFSException extends IOException{
+public abstract class VFSException extends IOException{
     String info;
-    VFSUnit unit;
+    String name;
 
-    public VFSException(String info){
+    public VFSException(String info,String file){
         this.info = info;
+        this.name = file;
+    }
+
+    public String getInfo(){
+      return info;
+    };
+
+    public String getFile(){
+        return name;
     }
 }

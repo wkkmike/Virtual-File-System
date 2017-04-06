@@ -8,58 +8,28 @@ import hk.edu.polyu.comp3222.vfs.util.PathParser;
 /**
  * A virtual disk.
  */
-public class VirtualDisk{
+public class VirtualDisk implements Serializable{
     private long size;
     private long occupySize;
-    public File ROOT_PATH;
+    private String name;
     private Date lastModify;
     private VFSUnit currentPath;
     private VFSUnit content;
-    private File info;
-    private File log;
+    private String localFile;
     /*
      * Default constructor.
      */
 
-    public VirtualDisk(String path, long size){
-        File root = new File(path);
-        this.ROOT_PATH = root;
-        File content = new File(path + "/root");
-        content.mkdir();
-        this.content = new Directory(content, null);
+    public VirtualDisk(String name, long size, String file){
+        this.name = name;
+        this.content = new Directory(name, null, new Date());
         this.currentPath = this.content;
         this.size = size;
         this.occupySize = 0;
-        this.lastModify = new Date(content.lastModified());
-        File info = new File(path + "/info.txt");
-        File log = new File(path + "/log.txt");
-        this.info = info;
-        this.log = log;
-        try{
-            info.createNewFile();
-            log.createNewFile();
-        }
-        catch (IOException e){
-            System.out.println("Create fail");
-            info.delete();
-            log.delete();
-            content.delete();
-            root.delete();
-        }
-        try(PrintWriter out = new PrintWriter(info)) {
-            out.println(String.valueOf(this.size));
-            out.println(String.valueOf(this.occupySize));
-            out.println(String.valueOf(this.lastModify.getTime()));
-        }
-        catch(FileNotFoundException e){
-            System.out.println("Create fail");
-            info.delete();
-            log.delete();
-            content.delete();
-            root.delete();
-        }
+        this.lastModify = new Date();
+        this.localFile = file + name + ".vfs";
     }
-
+/*
     public VirtualDisk(File path){
         this.ROOT_PATH = path;
         File content = new File(path.toString() + "/" + "root");
@@ -85,7 +55,7 @@ public class VirtualDisk{
             System.out.println("Get info failed");
         }
     }
-
+*/
     public long getSize(){
         return size;
     }
@@ -102,9 +72,6 @@ public class VirtualDisk{
         if(!this.content.delete()){
             return false;
         }
-        this.info.delete();
-        this.log.delete();
-        this.ROOT_PATH.delete();
         return true;
     }
 
@@ -114,9 +81,9 @@ public class VirtualDisk{
     }
 
     public boolean changeDirectory(String path){
-        PathParser parser = new PathParser(path, currentPath.getContent());
+        PathParser parser = new PathParser(path, currentPath);
         String[] element = parser.getElement();
-        VFSUnit temp = currentPath;
+        VFSUnit temp = this.content;
         for(String e: element){
             temp = temp.getChild(e);
             if(temp == null)
@@ -141,7 +108,7 @@ public class VirtualDisk{
     }
 
     public boolean listChildren(){
-        for(VFSUnit f: this.currentPath.getChildren()){
+        for(VFSUnit f: this.currentPath.getChildren().values()){
             System.out.println(f.getName());
             System.out.println(f.toString());
         }
@@ -149,13 +116,10 @@ public class VirtualDisk{
     }
 
     public boolean rename(String originName, String newName){
-        VFSUnit temp = this.currentPath.getChild(originName);
-        if(temp == null)
-            return false;
-        if(!temp.rename(newName))
-            return false;
-        return true;
+        return currentPath.changeChildName(originName, newName);
     }
+
+    
 
     public boolean delete(String name){
         VFSUnit temp = this.currentPath.getChild(name);
@@ -168,53 +132,27 @@ public class VirtualDisk{
     }
 
     public boolean createDirectory(String name){
-        VFSUnit temp = this.currentPath.getChild(name);
-        if(temp != null)
-            return false;
-        File out = new File(this.currentPath.getPath() + "/" + name);
-        if(!out.mkdirs())
-            return false;
-        VFSUnit newDir = new Directory(out, this.currentPath);
-        this.refresh();
+        VFSUnit newDir = new Directory(name, this.currentPath, new Date());
         return this.currentPath.addChild(newDir);
     }
 
-    public boolean createFile(String name){
-        VFSUnit temp = this.currentPath.getChild(name);
-        if(temp != null)
-            return false;
-        File out = new File(this.currentPath.getPath() + "/" + name);
-        try{
-            out.createNewFile();
-        }
-        catch(IOException e){
-            return false;
-        }
-        VFSUnit newFile = new VFSFile(out,this.currentPath);
-        this.refresh();
+    public boolean createFile(String name, String content){
+        VFSUnit newFile = new VFSFile(name,this.currentPath, new Date(), content.getBytes());
         return this.currentPath.addChild(newFile);
     }
 
     public String getCurrentPath(){
-        return this.currentPath.getDisplayName();
+        return this.name + "://" + this.currentPath.getDisplayName();
     }
 
     private void refresh(){
         this.occupySize = this.content.getSize();
         this.lastModify = this.content.getLastModify();
-        try (PrintWriter out = new PrintWriter(this.info);){
-            out.println(String.valueOf(this.size));
-            out.println(String.valueOf(this.occupySize));
-            out.println(String.valueOf(this.lastModify.getTime()));
-        }
-        catch(FileNotFoundException e){
-            System.out.println("Refresh fail");
-        }
     }
 
     public boolean  move(String name, String path){
         VFSUnit child = this.currentPath.getChild(name);
-        PathParser parser = new PathParser(path, currentPath.getContent());
+        PathParser parser = new PathParser(path, currentPath);
         String[] outDir = parser.getElement();
         VFSUnit temp = this.content;
         for(String e: outDir){
@@ -229,4 +167,33 @@ public class VirtualDisk{
         return true;
     }
 
+    public boolean exportFile(File export){
+        if(!export.exists()) return false;
+        if(!export.isDirectory()) return false;
+        try {
+            this.currentPath.export(export);
+        }
+        catch(IOException e){
+            System.out.println("eee");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean store(){
+        try {
+            File outFile = new File(localFile);
+            outFile.delete();
+            outFile.createNewFile();
+            FileOutputStream fileOut = new FileOutputStream(localFile);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(this);
+            out.close();
+            fileOut.close();
+            System.out.printf("Serialized data is saved in " + localFile + " .\n");
+        }catch(IOException i) {
+            i.printStackTrace();
+        }
+        return true;
+    }
 }

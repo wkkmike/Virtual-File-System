@@ -1,5 +1,7 @@
 package hk.edu.polyu.comp3222.vfs.util;
 
+import hk.edu.polyu.comp3222.vfs.core.VFSUnit;
+
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,10 +12,10 @@ import java.util.List;
 public class PathParser implements Parser{
     private String path;
 
-    public PathParser(String command, File currentPath){
+    public PathParser(String command, VFSUnit currentPath){
         String paths[] = command.split("/");
         if(paths[0] == "."){
-            path = currentPath.toString() + "/";
+            path = currentPath.getDisplayName() + "/";
             for(int i=1; i<paths.length; i++){
                 path += paths[i];
             }
