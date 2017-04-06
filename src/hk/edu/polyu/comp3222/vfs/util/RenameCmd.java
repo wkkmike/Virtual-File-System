@@ -3,16 +3,18 @@ package hk.edu.polyu.comp3222.vfs.util;
 import hk.edu.polyu.comp3222.vfs.core.VFSUnit;
 import hk.edu.polyu.comp3222.vfs.core.VirtualDisk;
 
+import java.util.ArrayList;
+
 /**
  * Created by lidawei on 03/04/2017.
  */
-public class RenameCmd extends Command {
-    public VFSUnit command(String[] cmd, IOService ioService, VirtualDisk disk){
+public class RenameCmd implements Command {
+    public String command(ArrayList<String> cmd, IOService ioService, VirtualDisk disk){
         String originName = null;
         String newName = null;
-        if (cmd.length > 1 && !cmd[1].equals(null) && !cmd[2].equals(null)) {
-            originName = cmd[1];
-            newName = cmd[2];
+        if (cmd.size() > 1 && !cmd.get(1).equals(null) && !cmd.get(2).equals(null)) {
+            originName = cmd.get(1);
+            newName = cmd.get(2);
         } else {
             ioService.printLine("Wrong Argument for touch command");
         }
